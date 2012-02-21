@@ -45,11 +45,10 @@
 #define PAM_OPT_ECHO_PASS		0x20
 
 __BEGIN_DECLS
-int  pam_get_pass(pam_handle_t *, const char **, const char *, int);
-int  pam_get_confirm_pass(pam_handle_t *, const char **, const char *,  
-        const char *, int);
-int  pam_std_option(int *, const char *);
-const char *pam_get_service(pam_handle_t *pamh);
+    int pam_get_pass(pam_handle_t *, const char **, const char *, int);
+int pam_get_confirm_pass(pam_handle_t *, const char **, const char *,
+			 const char *, int);
+int pam_std_option(int *, const char *);
+const char *pam_get_service(pam_handle_t * pamh);
 __END_DECLS
-
 #endif
