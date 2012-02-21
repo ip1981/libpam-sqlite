@@ -34,8 +34,6 @@
 #ifndef PAM_MOD_MISC_H
 #define PAM_MOD_MISC_H
 
-#include <sys/cdefs.h>
-
 /* Options */
 #define PAM_OPT_DEBUG			0x01
 #define PAM_OPT_NO_WARN			0x02
@@ -44,11 +42,10 @@
 #define PAM_OPT_USE_MAPPED_PASS		0x10
 #define PAM_OPT_ECHO_PASS		0x20
 
-__BEGIN_DECLS
-    int pam_get_pass(pam_handle_t *, const char **, const char *, int);
+int pam_get_pass(pam_handle_t *, const char **, const char *, int);
 int pam_get_confirm_pass(pam_handle_t *, const char **, const char *,
 			 const char *, int);
 int pam_std_option(int *, const char *);
 const char *pam_get_service(pam_handle_t * pamh);
-__END_DECLS
 #endif
+
