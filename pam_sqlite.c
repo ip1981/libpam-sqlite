@@ -19,17 +19,11 @@
 #include <string.h>
 #include <syslog.h>
 #include <ctype.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #include <time.h>
 #include <sqlite3.h>
-#if HAVE_CRYPT_H
 #include <crypt.h>
-#endif
 
 #define PAM_SM_AUTH
 #define PAM_SM_ACCOUNT
@@ -350,7 +344,6 @@ static sqlite3 *pam_sqlite_connect(struct module_options *options)
 static char *
 crypt_make_salt(struct module_options *options)
 {
-	int i;
 	time_t now;
 	static unsigned long x;
 	static char result[13];
