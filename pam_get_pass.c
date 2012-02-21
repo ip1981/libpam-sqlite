@@ -125,9 +125,9 @@ pam_get_confirm_pass(pam_handle_t * pamh, const char **passp,
 		return retval;
 
 	if (!resp)
-		return PAM_AUTHTOK_RECOVER_ERR;
+		return PAM_AUTHTOK_RECOVERY_ERR;
 	if (strcmp(resp[0].resp, resp[1].resp) != 0)
-		return PAM_AUTHTOK_RECOVER_ERR;
+		return PAM_AUTHTOK_RECOVERY_ERR;
 
 	retval = pam_set_item(pamh, PAM_AUTHTOK, resp[0].resp);
 	memset(resp[0].resp, 0, strlen(resp[0].resp));
