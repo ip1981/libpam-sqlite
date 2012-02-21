@@ -1,0 +1,7 @@
+Tue Feb 21 22:47:11 MSK 2012
+----------------------------
+
+ * Forked from <https://github.com/Sectoid/libpam-sqlite>
+ * Ported to SQLite3
+ * Use Automake and Libtool
+

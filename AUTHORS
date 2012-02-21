@@ -1,0 +1,7 @@
+
+Original SQLite2 PAM module:
+    Gleb Golubitsky <sectoid@gnolltech.com>, https://github.com/Sectoid
+
+Port to SQLite3, portability issues, code cleanups:
+   Igor Pashev <pashev.igor@gmail.com>, https://github.com/ip1981
+
