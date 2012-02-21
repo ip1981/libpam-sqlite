@@ -11,14 +11,17 @@ AC_PROG_LIBTOOL
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CHECK_HEADERS([sqlite.h security/pam_modules.h])
+AC_CHECK_HEADERS([sqlite3.h security/pam_modules.h],
+     [],
+     [AC_MSG_ERROR(Required headers not found)])
+
 AC_CHECK_LIB([pam], [pam_start], 
      [],
      [AC_MSG_ERROR([PAM not found])]
 )
-AC_CHECK_LIB([sqlite], [sqlite_open], 
+AC_CHECK_LIB([sqlite3], [sqlite3_open], 
      [],
-     [AC_MSG_ERROR([SQLite2 not found])]
+     [AC_MSG_ERROR([SQLite3 not found])]
 )
 
 AC_CONFIG_FILES([

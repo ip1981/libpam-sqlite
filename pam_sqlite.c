@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #endif
 #include <time.h>
-#include <sqlite.h>
+#include <sqlite3.h>
 #if HAVE_CRYPT_H
 #include <crypt.h>
 #endif
@@ -111,7 +111,7 @@ static char *format_query(const char *template, struct module_options *options,
 			switch(pct[1]) {
 				case 'U':	/* username */
 					if (user) {
-						tmp = sqlite_mprintf("%q", user);
+						tmp = sqlite3_mprintf("%q", user);
 						len = strlen(tmp);
 						APPEND(tmp, len);
 						sqlite_freemem(tmp);
@@ -119,7 +119,7 @@ static char *format_query(const char *template, struct module_options *options,
 					break;
 				case 'P':	/* password */
 					if (passwd) {
-						tmp = sqlite_mprintf("%q", passwd);
+						tmp = sqlite3_mprintf("%q", passwd);
 						len = strlen(tmp);
 						APPEND(tmp, len);
 						sqlite_freemem(tmp);
@@ -332,17 +332,15 @@ options_valid(struct module_options *options)
 }
 
 /* private: open SQLite database */
-static sqlite *pam_sqlite_connect(struct module_options *options)
+static sqlite3 *pam_sqlite_connect(struct module_options *options)
 {
-  char *errtext = NULL;
-  int mode = 0;
-  sqlite *sdb = NULL;
+  int rc;
+  sqlite3 *sdb = NULL;
 
-  sdb = sqlite_open(options->database, mode, &errtext);
+  rc = sqlite3_open(options->database, &sdb);
 
-  if (NULL == sdb) {
-	  SYSLOG("Error opening SQLite database (%s)", errtext);
-	  free(errtext);
+  if (rc != SQLITE_OK) {
+	  SYSLOG("Error opening SQLite database (%s)", sqlite3_errmsg(sdb));
   }
 
   return sdb;
@@ -414,11 +412,10 @@ auth_verify_password(const char *user, const char *passwd,
 					 struct module_options *options)
 {
 	int res;
-	sqlite *conn;
-	sqlite_vm *vm;
+	sqlite3 *conn;
+	sqlite3_stmt *pStmt;
 	int rc;
 	const char *tail;
-	char *errtext = NULL;
 	char *query;
 	int ncols;
 	const char **cols;
@@ -432,22 +429,17 @@ auth_verify_password(const char *user, const char *passwd,
 	query = format_query(options->sql_verify ? options->sql_verify :
 			"SELECT %Op FROM %Ot WHERE %Ou='%U'",
 			options, user, passwd);
-
 	DBGLOG("query: %s", query);
-	
-	res = sqlite_compile(conn, query, &tail, &vm, &errtext);
-   
+	res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
 	free(query);
-
 	if (res != SQLITE_OK) {
-		DBGLOG("Error executing SQLite query (%s)", errtext);
-		sqlite_freemem(errtext);
+		DBGLOG("Error preparing SQLite query (%s)", sqlite3_errmsg(conn));
 		return PAM_AUTH_ERR;
 	}
 	
 	rc = PAM_AUTH_ERR;
 
-	if (SQLITE_ROW != sqlite_step(vm, &ncols, &cols, &col_names)) {
+	if (SQLITE_ROW != sqlite3_step(pStmt)) {
 		rc = PAM_USER_UNKNOWN;
 		DBGLOG("no rows to retrieve");
 	} else {
@@ -468,9 +460,8 @@ auth_verify_password(const char *user, const char *passwd,
 		}
 	}
 
-	sqlite_finalize(vm, &errtext);
-	sqlite_close(conn);
-	sqlite_freemem(errtext);
+	sqlite3_finalize(pStmt);
+	sqlite3_close(conn);
 	return rc;
 }
 
@@ -518,11 +509,10 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 	struct module_options *options;
 	const char *user;
 	int rc;
-	sqlite *conn;
-	sqlite_vm *vm;
+	sqlite3 *conn;
+	sqlite3_stmt *pStmt;
 	char *query;
 	const char *tail;
-	char *errtext = NULL;
 	int ncols;
 	const char **cols;
 	const char **col_names;
@@ -557,33 +547,28 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 		query = format_query(options->sql_check_expired ? options->sql_check_expired :
 				"SELECT 1 from %Ot WHERE %Ou='%U' AND (%Ox='y' OR %Ox='1')",
 				options, user, NULL);
-		
 		DBGLOG("query: %s", query);
-
-		res = sqlite_compile(conn, query, &tail, &vm, &errtext);
-
+	    res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
 		free(query);
 
 		if (res != SQLITE_OK) {
-			DBGLOG("Error executing SQLite query (%s)", errtext);
-			sqlite_freemem(errtext);
+			DBGLOG("Error executing SQLite query (%s)", sqlite3_errmsg(conn));
 			free_module_options(options);
-			sqlite_close(conn);
+			sqlite3_close(conn);
 			return PAM_AUTH_ERR;
 		}
 
-		res = sqlite_step(vm, &ncols, &cols, &col_names);
+		res = sqlite3_step_v2(pStmt);
 
 		DBGLOG("query result: %d", res);
 
-		if(SQLITE_ROW == res) {
-			sqlite_finalize(vm, &errtext);
-			sqlite_close(conn);
-			sqlite_freemem(errtext);
+		if (SQLITE_ROW == res) {
+			sqlite3_finalize(pStmt);
+			sqlite3_close(conn);
 			free_module_options(options);
 			return PAM_ACCT_EXPIRED;
 		}
-		sqlite_finalize(vm, &errtext);
+		sqlite3_finalize(pStmt);
 	}
 
 	/* if new password is required then newtok_column = 'y' or '1' */
@@ -591,32 +576,29 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 		query = format_query(options->sql_check_newtok ? options->sql_check_newtok :
 				"SELECT 1 FROM %Ot WHERE %Ou='%U' AND (%On='y' OR %On='1')",
 				options, user, NULL);
-
 		DBGLOG("query: %s", query);
-
-		res = sqlite_compile(conn, query, &tail, &vm, &errtext);
+	    res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
 		free(query);
 
 		if (res != SQLITE_OK) {
-			DBGLOG("query failed: %s", errtext);
+			DBGLOG("query failed: %s", sqlite3_errmsg(conn));
 			sqlite_close(conn);
-			sqlite_freemem(errtext);
 			free_module_options(options);
 			return PAM_AUTH_ERR;
 		}
 
-		res = sqlite_step(vm, &ncols, &cols, &col_names);
+		res = sqlite3_step_v2(pStmt);
 
 		if(SQLITE_ROW == res) {
-			sqlite_finalize(vm, &errtext);
-			sqlite_close(conn);
+			sqlite3_finalize(pStmt);
+			sqlite3_close(conn);
 			free_module_options(options);
 			return PAM_NEW_AUTHTOK_REQD;
 		}
-		sqlite_finalize(vm, &errtext);
+		sqlite3_finalize(pStmt);
 	}
 
-	sqlite_close(conn);
+	sqlite3_close(conn);
 	return PAM_SUCCESS;
 }
 
@@ -628,8 +610,8 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	int rc, std_flags;
 	const char *user, *pass, *newpass;
 	char *newpass_crypt;
-	sqlite *conn;
-	char *errtext = NULL;
+    char * errtext;
+	sqlite3 *conn;
 	char *query;
 	int res;
 
@@ -717,21 +699,21 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 		DBGLOG("query: %s", query);
 
-		res = sqlite_exec(conn, query, NULL, NULL, &errtext);
+		res = sqlite3_exec(conn, query, NULL, NULL, &errtext);
 		free(query);
 
 		if (SQLITE_OK != res) {
 			DBGLOG("query failed[%d]: %s", res, errtext);
-			sqlite_freemem(errtext);
+			sqlite3_free(errtext);
 			free(newpass_crypt);
 			free_module_options(options);
-			sqlite_close(conn);
+			sqlite3_close(conn);
 			return PAM_AUTH_ERR;
 		}
 	
 		/* if we get here, we must have succeeded */
 		free(newpass_crypt);
-		sqlite_close(conn);
+		sqlite3_close(conn);
 	}
 
 	free_module_options(options);
