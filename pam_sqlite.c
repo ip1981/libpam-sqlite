@@ -25,10 +25,18 @@
 #include <sqlite3.h>
 #include <crypt.h>
 
+/* pam_appl.h required for pam_modules.h on Illumos/Solaris */
+#include <security/pam_appl.h>
 #define PAM_SM_AUTH
 #define PAM_SM_ACCOUNT
 #define PAM_SM_PASSWORD
 #include <security/pam_modules.h>
+
+/* Illumos/Solaris PAM doen't define this */
+#ifndef PAM_EXTERN
+#define PAM_EXTERN /* empty */
+#endif
+
 #include "pam_mod_misc.h"
 
 #ifndef UNUSED

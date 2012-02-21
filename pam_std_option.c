@@ -31,6 +31,9 @@
  */
 
 /* $Id: pam_std_option.c,v 1.1 2003/06/20 09:56:31 ek Exp $ */
+
+/* pam_appl.h required for pam_modules.h on Illumos/Solaris */
+#include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include <string.h>
 #include "pam_mod_misc.h"

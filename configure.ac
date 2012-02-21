@@ -10,18 +10,34 @@ LT_INIT([disable-static])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CHECK_HEADERS([sqlite3.h security/pam_modules.h],
-     [],
-     [AC_MSG_ERROR(Required headers not found)])
+AC_CHECK_HEADERS(
+    [sqlite3.h security/pam_appl.h],
+    [],
+    [AC_MSG_ERROR(Required headers not found)]
+)
 
-AC_CHECK_LIB([pam], [pam_start], 
-     [],
-     [AC_MSG_ERROR([PAM not found])]
+dnl On Illumos pam_appl.h must be included before pam_modules.h
+AC_CHECK_HEADER(
+    [security/pam_modules.h],
+    [],
+    [AC_MSG_ERROR([Required headers not found])],
+    [
+     #include <security/pam_appl.h>
+    ]
 )
-AC_CHECK_LIB([sqlite3], [sqlite3_open], 
-     [],
-     [AC_MSG_ERROR([SQLite3 not found])]
+
+
+AC_CHECK_LIB(
+    [pam], [pam_start], 
+    [],
+    [AC_MSG_ERROR([PAM not found])]
 )
+AC_CHECK_LIB(
+    [sqlite3], [sqlite3_open], 
+    [],
+    [AC_MSG_ERROR([SQLite3 not found])]
+)
+
 AC_SEARCH_LIBS([crypt], [crypt])
 
 AC_CONFIG_FILES([

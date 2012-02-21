@@ -3,6 +3,8 @@
  */
 
 /* $Id: pam_get_service.c,v 1.1 2003/06/20 09:56:31 ek Exp $ */
+/* pam_appl.h required for pam_modules.h on Illumos/Solaris */
+#include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include <stddef.h>
 

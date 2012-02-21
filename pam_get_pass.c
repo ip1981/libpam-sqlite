@@ -33,6 +33,8 @@
 /* $Id: pam_get_pass.c,v 1.2 2003/06/20 10:34:16 ek Exp $ */
 #include <stdlib.h>
 #include <string.h>
+/* pam_appl.h required for pam_modules.h on Illumos/Solaris */
+#include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include "pam_mod_misc.h"
 
