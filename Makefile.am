@@ -9,5 +9,5 @@ pam_sqlite_la_SOURCES = \
 
 pam_sqlite_la_LDFLAGS = -module -avoid-version -no-undefined
 
-#pam_sqlite_la_LIBADD = $(PAM_LIBS) $(SQLITE_LIBS)
+dist_EXTRA = test.c
 
