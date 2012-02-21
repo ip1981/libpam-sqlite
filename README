@@ -1,4 +1,4 @@
-pam_sqlite 0.3
+pam_sqlite 0.4
 =============
 
 Introduction
@@ -15,13 +15,13 @@ Compilation & Installation
 pam_sqlite is now autoconf'ed, thus, compiling should be a matter
 of:
 
-    $ ./configure
+    $ ./configure --libdir=/path/to/pam/modules
     $ make
     $ make install
 
-Compilation has been tested on RedHat Linux 7.3.
+Functionality has been tested on Debian GNU/Linux Wheezy and Illumos.
 
-You will need to have SQLite library and header files
+You will need to have SQLite3 library and header files
 for this module to compile.
 
 See test.c for an example application that authenticates using
