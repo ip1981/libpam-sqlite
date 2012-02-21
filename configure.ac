@@ -7,7 +7,6 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_PROG_CC
 LT_INIT([disable-static])
-AC_PROG_LIBTOOL
 
 AC_CONFIG_MACRO_DIR([m4])
 
