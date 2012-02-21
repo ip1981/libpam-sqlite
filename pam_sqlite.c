@@ -558,7 +558,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 			return PAM_AUTH_ERR;
 		}
 
-		res = sqlite3_step_v2(pStmt);
+		res = sqlite3_step(pStmt);
 
 		DBGLOG("query result: %d", res);
 
@@ -587,7 +587,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 			return PAM_AUTH_ERR;
 		}
 
-		res = sqlite3_step_v2(pStmt);
+		res = sqlite3_step(pStmt);
 
 		if(SQLITE_ROW == res) {
 			sqlite3_finalize(pStmt);
