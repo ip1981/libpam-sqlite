@@ -114,7 +114,7 @@ static char *format_query(const char *template, struct module_options *options,
 						tmp = sqlite3_mprintf("%q", user);
 						len = strlen(tmp);
 						APPEND(tmp, len);
-						sqlite_freemem(tmp);
+						sqlite3_free(tmp);
 					}
 					break;
 				case 'P':	/* password */
@@ -122,7 +122,7 @@ static char *format_query(const char *template, struct module_options *options,
 						tmp = sqlite3_mprintf("%q", passwd);
 						len = strlen(tmp);
 						APPEND(tmp, len);
-						sqlite_freemem(tmp);
+						sqlite3_free(tmp);
 					}
 					break;
 
