@@ -23,6 +23,7 @@ AC_CHECK_LIB([sqlite3], [sqlite3_open],
      [],
      [AC_MSG_ERROR([SQLite3 not found])]
 )
+AC_SEARCH_LIBS([crypt], [crypt])
 
 AC_CONFIG_FILES([
     Makefile

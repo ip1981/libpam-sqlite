@@ -31,6 +31,10 @@
 #include <security/pam_modules.h>
 #include "pam_mod_misc.h"
 
+#ifndef UNUSED
+#define UNUSED(x) (void)(x)
+#endif
+
 #define PASSWORD_PROMPT			"Password: "
 #define PASSWORD_PROMPT_NEW		"New password: "
 #define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
@@ -408,11 +412,7 @@ auth_verify_password(const char *user, const char *passwd,
 	sqlite3 *conn;
 	sqlite3_stmt *pStmt;
 	int rc;
-	const char *tail;
 	char *query;
-	int ncols;
-	const char **cols;
-	const char **col_names;
 
 #define CRYPT_LEN 13
 
@@ -423,7 +423,7 @@ auth_verify_password(const char *user, const char *passwd,
 			"SELECT %Op FROM %Ot WHERE %Ou='%U'",
 			options, user, passwd);
 	DBGLOG("query: %s", query);
-	res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
+	res = sqlite3_prepare_v2(conn, query, -1, &pStmt, NULL);
 	free(query);
 	if (res != SQLITE_OK) {
 		DBGLOG("Error preparing SQLite query (%s)", sqlite3_errmsg(conn));
@@ -436,7 +436,8 @@ auth_verify_password(const char *user, const char *passwd,
 		rc = PAM_USER_UNKNOWN;
 		DBGLOG("no rows to retrieve");
 	} else {
-		const char *stored_pw = cols[0];
+		const char *stored_pw =
+            (const char *) sqlite3_column_text(pStmt, 0);
 
 		switch(options->pw_type) {
 		case PW_CLEAR:
@@ -465,6 +466,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	struct module_options *options;
 	const char *user, *password;
 	int rc, std_flags;
+    UNUSED(flags);
 
 	if((rc = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return rc;
@@ -505,11 +507,8 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 	sqlite3 *conn;
 	sqlite3_stmt *pStmt;
 	char *query;
-	const char *tail;
-	int ncols;
-	const char **cols;
-	const char **col_names;
 	int res;
+    UNUSED(flags);
 
 	get_module_options(argc, argv, &options);
 	if(options_valid(options) != 0) {
@@ -541,7 +540,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 				"SELECT 1 from %Ot WHERE %Ou='%U' AND (%Ox='y' OR %Ox='1')",
 				options, user, NULL);
 		DBGLOG("query: %s", query);
-	    res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
+	    res = sqlite3_prepare_v2(conn, query, -1, &pStmt, NULL);
 		free(query);
 
 		if (res != SQLITE_OK) {
@@ -570,12 +569,12 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 				"SELECT 1 FROM %Ot WHERE %Ou='%U' AND (%On='y' OR %On='1')",
 				options, user, NULL);
 		DBGLOG("query: %s", query);
-	    res = sqlite3_prepare_v2(conn, query, strlen(query), &pStmt, &tail);
+	    res = sqlite3_prepare_v2(conn, query, -1, &pStmt, NULL);
 		free(query);
 
 		if (res != SQLITE_OK) {
 			DBGLOG("query failed: %s", sqlite3_errmsg(conn));
-			sqlite_close(conn);
+			sqlite3_close(conn);
 			free_module_options(options);
 			return PAM_AUTH_ERR;
 		}
@@ -718,6 +717,10 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 PAM_EXTERN int
 pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
+    UNUSED(pamh);
+    UNUSED(flags);
+    UNUSED(argc);
+    UNUSED(argv);
 	return PAM_SUCCESS;
 }
 
