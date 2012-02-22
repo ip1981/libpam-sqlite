@@ -283,7 +283,7 @@ get_module_options(int argc, const char **argv, struct module_options **options)
 	struct module_options *opts;
 
 	opts = (struct module_options *)malloc(sizeof *opts);
-	bzero(opts, sizeof(*opts));
+	memset(opts, 0, sizeof(*opts));
 	opts->pw_type = PW_CLEAR;
 	rc = 0;
 
@@ -323,7 +323,7 @@ static void free_module_options(struct module_options *options)
 	if (options->sql_set_passwd)
 		free(options->sql_set_passwd);
 
-	bzero(options, sizeof(*options));
+	memset(options, 0, sizeof(*options));
 	free(options);
 }
 
