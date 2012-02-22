@@ -48,14 +48,14 @@
 #define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
 #define CONF					"/etc/pam_sqlite.conf"
 
-#define DBGLOG(x...)  if(options->debug) {							\
+#define DBGLOG(...)  if(options->debug) {							\
 						  openlog("PAM_sqlite", LOG_PID, LOG_AUTH); \
-						  syslog(LOG_DEBUG, ##x);					\
+						  syslog(LOG_DEBUG, ##__VA_ARGS__);					\
 						  closelog();								\
 					  }
-#define SYSLOG(x...)  do {											\
+#define SYSLOG(...)  do {											\
 						  openlog("PAM_sqlite", LOG_PID, LOG_AUTH); \
-						  syslog(LOG_INFO, ##x);					\
+						  syslog(LOG_INFO, ##__VA_ARGS__);					\
 						  closelog();								\
 					  } while(0);
 
