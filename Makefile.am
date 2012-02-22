@@ -1,5 +1,7 @@
 lib_LTLIBRARIES = pam_sqlite.la
 
+AM_CPPFLAGS = -D_XOPEN_SOURCE=500
+
 pam_sqlite_la_SOURCES = \
 	pam_get_pass.c \
 	pam_get_service.c \
