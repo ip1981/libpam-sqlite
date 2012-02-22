@@ -5,7 +5,7 @@ AM_INIT_AUTOMAKE
 
 AC_CONFIG_HEADERS([config.h])
 
-AC_PROG_CC
+AC_PROG_CC_C99
 LT_INIT([disable-static])
 
 AC_CONFIG_MACRO_DIR([m4])
