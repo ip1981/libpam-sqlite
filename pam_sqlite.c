@@ -64,7 +64,7 @@ typedef enum {
 #if HAVE_MD5_CRYPT
 	PW_MD5,
 #endif
-	PW_CRYPT,
+	PW_CRYPT
 } pw_scheme;
 
 struct module_options {
